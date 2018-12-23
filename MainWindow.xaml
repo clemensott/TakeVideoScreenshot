@@ -8,7 +8,7 @@
         mc:Ignorable="d"
         Title="MainWindow" Height="350" Width="725"
         AllowDrop="True" Drop="Window_Drop">
-   
+
     <Grid Name="panel">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
@@ -17,6 +17,8 @@
         </Grid.RowDefinitions>
 
         <StackPanel Grid.Row="0" Orientation="Horizontal">
+            <TextBlock Grid.Row="2" Name="tblState" VerticalAlignment="Top" 
+                   HorizontalAlignment="Left" Background="White"/>
             <Button Content="PlayPause" Width="100" Height="22" Click="BtnPlayPause_Click"/>
             <Button Content="Slower" Width="100" Height="22" Click="BtnSlower_Click"/>
             <Button Content="Faster" Width="100" Height="22" Click="BtnFaster_Click"/>
@@ -27,8 +29,12 @@
         </StackPanel>
 
         <Slider Grid.Row="1" Name="sld" Minimum="0" Maximum="1" IsMoveToPointEnabled="True"
-                ValueChanged="sld_ValueChanged"/>
+                ValueChanged="Sld_ValueChanged"/>
 
-        <vlc:VlcControl Grid.Row="2" Name="me" KeyDown="me_KeyDown"/>
+        <Grid Grid.Row="2" KeyDown="Me_KeyDown" Visibility="Visible">
+            <vlc:VlcControl Name="me1"/>
+            <vlc:VlcControl Name="me2"/>
+            <vlc:VlcControl Name="me3"/>
+        </Grid>
     </Grid>
 </Window>

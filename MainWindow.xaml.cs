@@ -1,12 +1,16 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.ComponentModel;
 using System.IO;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Input;
+using System.Windows.Threading;
 using Vlc.DotNet.Core;
 using Vlc.DotNet.Core.Interops.Signatures;
-using Vlc.DotNet.Forms;
+using Vlc.DotNet.Wpf;
 
 namespace TakeVideoScreenshot
 {
@@ -15,21 +19,68 @@ namespace TakeVideoScreenshot
     /// </summary>
     public partial class MainWindow : Window
     {
-        private VlcControl vlc;
         private DateTime videoCreated;
         private TimeSpan length;
+        private readonly RotateList<VlcControl> vlcs;
+        private readonly Dictionary<Vlc.DotNet.Forms.VlcControl, string> busyVlcs;
+        private readonly DispatcherTimer timer;
+
+        public VlcControl CurrentVlcControl { get => vlcs[0]; }
+
+        public Vlc.DotNet.Forms.VlcControl CurrentMediaPlayer { get => vlcs[0].MediaPlayer; }
 
         public MainWindow()
         {
             InitializeComponent();
 
-            me.MediaPlayer.BeginInit();
-            me.MediaPlayer.VlcLibDirectory = new DirectoryInfo(@"vlc");
-            me.MediaPlayer.EndInit();
+            vlcs = new RotateList<VlcControl>();
+            busyVlcs = new Dictionary<Vlc.DotNet.Forms.VlcControl, string>();
+            timer = new DispatcherTimer();
 
-            vlc = me.MediaPlayer;
-            vlc.PositionChanged += Vlc_PositionChanged;
-            vlc.LengthChanged += Vlc_LengthChanged;
+            foreach (VlcControl wpfVlc in GetWpfVlcControls())
+            {
+                wpfVlc.MediaPlayer.BeginInit();
+                wpfVlc.MediaPlayer.VlcLibDirectory = new DirectoryInfo(@"vlc");
+                wpfVlc.MediaPlayer.EndInit();
+
+                wpfVlc.Visibility = Visibility.Hidden;
+
+                vlcs.Add(wpfVlc);
+            }
+
+            CurrentVlcControl.Visibility = Visibility.Visible;
+
+            CurrentMediaPlayer.PositionChanged += Vlc_PositionChanged;
+            CurrentMediaPlayer.LengthChanged += Vlc_LengthChanged;
+
+            timer.Interval = TimeSpan.FromMilliseconds(100);
+            timer.Tick += Timer_Tick;
+            timer.Start();
+        }
+
+        private IEnumerable<VlcControl> GetWpfVlcControls()
+        {
+            yield return me1;
+            yield return me2;
+            yield return me3;
+        }
+
+        private void Timer_Tick(object sender, EventArgs e)
+        {
+            foreach (var pair in busyVlcs.ToArray())
+            {
+                if (File.Exists(pair.Value))
+                {
+                    busyVlcs.Remove(pair.Key);
+                    System.Diagnostics.Debug.WriteLine("Remove: " + new FileInfo(pair.Value).Length);
+
+                    if (pair.Key == CurrentMediaPlayer) CurrentMediaPlayer.Position = (float)sld.Value;
+                }
+            }
+
+            if (busyVlcs.ContainsKey(CurrentMediaPlayer)) NextVlc();
+
+            tblState.Text = busyVlcs.ContainsKey(CurrentMediaPlayer) ? "Busy" : "Ready";
         }
 
         private void Vlc_LengthChanged(object sender, VlcMediaPlayerLengthChangedEventArgs e)
@@ -46,7 +97,7 @@ namespace TakeVideoScreenshot
         {
             lock (sld)
             {
-                sld.Value = vlc.Position;
+                sld.Value = CurrentMediaPlayer.Position;
             }
         }
 
@@ -59,8 +110,12 @@ namespace TakeVideoScreenshot
 
                 videoCreated = file.LastWriteTime;
 
-                vlc.Play(file);
+                foreach (VlcControl vlc in vlcs)
+                {
+                    vlc.MediaPlayer.SetMedia(file);
+                }
 
+                CurrentMediaPlayer.Play();
             }
         }
 
@@ -94,14 +149,14 @@ namespace TakeVideoScreenshot
             TakeScreenshot();
         }
 
-        private void sld_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
+        private void Sld_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
         {
             if (Monitor.IsEntered(sld)) return;
 
-            vlc.Position = (float)sld.Value;
+            CurrentMediaPlayer.Position = (float)sld.Value;
         }
 
-        private void me_KeyDown(object sender, KeyEventArgs e)
+        private void Me_KeyDown(object sender, KeyEventArgs e)
         {
             switch (e.Key)
             {
@@ -141,63 +196,67 @@ namespace TakeVideoScreenshot
 
         private void PlayPause()
         {
-            switch (vlc.State)
+            switch (CurrentMediaPlayer.State)
             {
                 case MediaStates.Buffering:
-                    vlc.Pause();
+                    CurrentMediaPlayer.Pause();
                     break;
 
                 case MediaStates.Ended:
-                    vlc.Position = 0;
-                    vlc.Play();
+                    CurrentMediaPlayer.Position = 0;
+                    CurrentMediaPlayer.Play();
                     break;
 
                 case MediaStates.Opening:
-                    vlc.Pause();
+                    CurrentMediaPlayer.Pause();
                     break;
 
                 case MediaStates.Paused:
-                    vlc.Play();
+                    CurrentMediaPlayer.Play();
                     break;
 
                 case MediaStates.Playing:
-                    vlc.Pause();
+                    CurrentMediaPlayer.Pause();
                     break;
 
                 case MediaStates.Stopped:
-                    vlc.Position = 0;
-                    vlc.Play();
+                    CurrentMediaPlayer.Position = 0;
+                    CurrentMediaPlayer.Play();
+                    break;
+
+                default:
+                    CurrentMediaPlayer.Position = (float)sld.Value;
+                    CurrentMediaPlayer.Play();
                     break;
             }
         }
 
         private void SlowerDown()
         {
-            vlc.Rate /= (float)1.1;
+            CurrentMediaPlayer.Rate /= (float)1.1;
         }
 
         private void SpeedUp()
         {
-            vlc.Rate *= (float)1.1;
+            CurrentMediaPlayer.Rate *= (float)1.1;
         }
 
         private void PreviousFrame()
         {
-            TimeSpan time = TimeSpan.FromDays(vlc.Position * length.TotalDays);
+            TimeSpan time = TimeSpan.FromDays(CurrentMediaPlayer.Position * length.TotalDays);
 
-            if (vlc.State == MediaStates.Playing) vlc.Pause();
+            if (CurrentMediaPlayer.State == MediaStates.Playing) CurrentMediaPlayer.Pause();
 
-            TimeSpan timePerFrame = TimeSpan.FromSeconds(1 / vlc.VlcMediaPlayer.FramesPerSecond);
+            TimeSpan timePerFrame = TimeSpan.FromSeconds(1 / CurrentMediaPlayer.VlcMediaPlayer.FramesPerSecond);
             TimeSpan timeOfFrameBefore = time - timePerFrame;
 
-            vlc.Position = 0;
-
-            vlc.Position = (float)(timeOfFrameBefore.TotalDays / length.TotalDays);
+            CurrentMediaPlayer.Position = 0;
+            CurrentMediaPlayer.Position = (float)(timeOfFrameBefore.TotalDays / length.TotalDays);
         }
 
         private void NextFrame()
         {
-            vlc.VlcMediaPlayer.NextFrame();
+            CurrentMediaPlayer.VlcMediaPlayer.NextFrame();
         }
 
         private void TakeScreenshot()
@@ -211,7 +270,7 @@ namespace TakeVideoScreenshot
                 return;
             }
 
-            TimeSpan playerTime = TimeSpan.FromDays(vlc.Position * length.TotalDays);
+            TimeSpan playerTime = TimeSpan.FromDays(CurrentMediaPlayer.Position * length.TotalDays);
             DateTime captureTime = videoCreated + playerTime;
 
             do
@@ -223,7 +282,10 @@ namespace TakeVideoScreenshot
 
             } while (File.Exists(path));
 
-            Task.Factory.StartNew(new Action<object>(TakeScreenshot), path);
+
+            Task.Factory.StartNew(() => TakeScreenshot(CurrentMediaPlayer, path));
+
+            NextVlc();
         }
 
         private static string Convert(DateTime t)
@@ -234,17 +296,66 @@ namespace TakeVideoScreenshot
             return date + " " + time;
         }
 
-        private void TakeScreenshot(object path)
+        private void TakeScreenshot(Vlc.DotNet.Forms.VlcControl vlc, string path)
         {
-            vlc.TakeSnapshot(path.ToString());
+            System.Diagnostics.Debug.WriteLine("Take: " + vlc.GetHashCode());
+
+            busyVlcs.Add(vlc, path);
+            while (!File.Exists(path)) vlc.TakeSnapshot(path);
+
+            System.Diagnostics.Debug.WriteLine("Took: " + vlc.GetHashCode());
         }
 
         private void Forward(TimeSpan offset)
         {
-            TimeSpan time = TimeSpan.FromDays(vlc.Position * length.TotalDays);
+            TimeSpan time = TimeSpan.FromDays(CurrentMediaPlayer.Position * length.TotalDays);
             TimeSpan timeTo = time + offset;
 
-            vlc.Position = (float)(timeTo.TotalDays / length.TotalDays);
+            CurrentMediaPlayer.Position = (float)(timeTo.TotalDays / length.TotalDays);
+        }
+
+        private void NextVlc()
+        {
+            bool isPlayling = CurrentMediaPlayer.IsPlaying;
+            float position = CurrentMediaPlayer.Position;
+
+            CurrentMediaPlayer.Pause();
+
+            CurrentMediaPlayer.PositionChanged -= Vlc_PositionChanged;
+            CurrentMediaPlayer.LengthChanged -= Vlc_LengthChanged;
+
+            CurrentVlcControl.Visibility = Visibility.Hidden;
+
+            for (int i = 0; i < vlcs.Count; i++)
+            {
+                vlcs.Next();
+
+                if (!busyVlcs.ContainsKey(CurrentMediaPlayer)) break;
+            }
+
+            CurrentVlcControl.Visibility = Visibility.Visible;
+
+            CurrentMediaPlayer.PositionChanged += Vlc_PositionChanged;
+            CurrentMediaPlayer.LengthChanged += Vlc_LengthChanged;
+
+            System.Diagnostics.Debug.WriteLine("NextVlc: " + CurrentMediaPlayer.GetHashCode());
+            System.Diagnostics.Debug.WriteLine(busyVlcs.ContainsKey(CurrentMediaPlayer));
+            System.Diagnostics.Debug.WriteLine(CurrentMediaPlayer.IsPlaying);
+
+            if (isPlayling && !busyVlcs.ContainsKey(CurrentMediaPlayer))
+            {
+                CurrentMediaPlayer.Play();
+
+                CurrentMediaPlayer.Position = 0;
+                CurrentMediaPlayer.Position = position;
+            }
+        }
+
+        protected override void OnClosing(CancelEventArgs e)
+        {
+            timer.Stop();
+
+            base.OnClosing(e);
         }
     }
 }
