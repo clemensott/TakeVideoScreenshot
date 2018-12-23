@@ -4,10 +4,10 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:TakeVideoScreenshot"
-        xmlns:vlc="clr-namespace:Vlc.DotNet.Wpf;assembly=Vlc.DotNet.Wpf"
+        xmlns:ffme="clr-namespace:Unosquare.FFME;assembly=ffme.win"
         mc:Ignorable="d"
         Title="MainWindow" Height="350" Width="725"
-        AllowDrop="True" Drop="Window_Drop">
+        AllowDrop="True" Drop="Window_Drop" KeyDown="Me_KeyDown">
 
     <Grid Name="panel">
         <Grid.RowDefinitions>
@@ -17,24 +17,21 @@
         </Grid.RowDefinitions>
 
         <StackPanel Grid.Row="0" Orientation="Horizontal">
-            <TextBlock Grid.Row="2" Name="tblState" VerticalAlignment="Top" 
-                   HorizontalAlignment="Left" Background="White"/>
             <Button Content="PlayPause" Width="100" Height="22" Click="BtnPlayPause_Click"/>
             <Button Content="Slower" Width="100" Height="22" Click="BtnSlower_Click"/>
             <Button Content="Faster" Width="100" Height="22" Click="BtnFaster_Click"/>
             <Button Content="Frame Back" Width="100" Height="22" Click="BtnBack_Click"/>
             <Button Content="Frame Forward" Width="100" Height="22" Click="BtnFor_Click"/>
             <Button Content="Take" Width="100" Height="22" Click="BtnTake_Click"/>
-            <TextBox Name="tbxFilePrefix" Width="550"/>
+            <TextBox Name="tbxFilePrefix" Width="1550"/>
         </StackPanel>
 
         <Slider Grid.Row="1" Name="sld" Minimum="0" Maximum="1" IsMoveToPointEnabled="True"
                 ValueChanged="Sld_ValueChanged"/>
 
-        <Grid Grid.Row="2" KeyDown="Me_KeyDown" Visibility="Visible">
-            <vlc:VlcControl Name="me1"/>
-            <vlc:VlcControl Name="me2"/>
-            <vlc:VlcControl Name="me3"/>
-        </Grid>
+        <ffme:MediaElement Grid.Row="2" Name="me" IsMuted="True" LoadedBehavior="Play" 
+                           MediaOpened="Me_MediaOpened" RenderingVideo="Me_RenderingVideo"/>
+        
+        <Rectangle Grid.Row="2" Name="rect" Fill="Transparent"/>
     </Grid>
 </Window>
