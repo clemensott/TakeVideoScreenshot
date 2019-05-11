@@ -187,7 +187,7 @@ namespace TakeVideoScreenshot
         private void TakeScreenshot()
         {
             string path;
-            string filePrefix = tbxFilePrefix.Text;
+            string filePrefix = tbxFilePrefix.Text.Trim();
 
             if (filePrefix.Length == 0)
             {
@@ -199,7 +199,7 @@ namespace TakeVideoScreenshot
 
             do
             {
-                string fileName = string.Format(" {1}.png", filePrefix, Convert(captureTime));
+                string fileName = string.Format(" {0}.png", Convert(captureTime));
                 path = filePrefix + fileName;
 
                 captureTime = captureTime.AddMilliseconds(1);
@@ -237,6 +237,11 @@ namespace TakeVideoScreenshot
             timer.Stop();
 
             base.OnClosing(e);
+        }
+
+        private void Rect_PreviewMouseUp(object sender, MouseButtonEventArgs e)
+        {
+            ((FrameworkElement)sender).Focus();
         }
     }
 }

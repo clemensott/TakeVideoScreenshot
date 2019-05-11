@@ -31,7 +31,7 @@
 
         <ffme:MediaElement Grid.Row="2" Name="me" IsMuted="True" LoadedBehavior="Play" 
                            MediaOpened="Me_MediaOpened" RenderingVideo="Me_RenderingVideo"/>
-        
-        <Rectangle Grid.Row="2" Name="rect" Fill="Transparent"/>
+
+        <Rectangle Grid.Row="2" Name="rect" Fill="Transparent" Focusable="True" PreviewMouseUp="Rect_PreviewMouseUp"/>
     </Grid>
 </Window>
