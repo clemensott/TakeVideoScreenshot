@@ -3,11 +3,10 @@ using System.ComponentModel;
 using System.IO;
 using System.Threading.Tasks;
 using System.Windows;
-using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Threading;
-using Unosquare.FFME.Events;
+using Unosquare.FFME.Common;
 
 namespace TakeVideoScreenshot
 {
@@ -25,7 +24,7 @@ namespace TakeVideoScreenshot
         {
             InitializeComponent();
 
-            Unosquare.FFME.MediaElement.FFmpegDirectory = Environment.CurrentDirectory;
+            //Unosquare.FFME.MediaElement.FFmpegDirectory = Environment.CurrentDirectory;
 
             timer = new DispatcherTimer();
             timer.Interval = TimeSpan.FromSeconds(1);
@@ -126,6 +125,7 @@ namespace TakeVideoScreenshot
                     break;
 
                 case Key.W:
+                case Key.S:
                     TakeScreenshot();
                     break;
 
@@ -133,7 +133,7 @@ namespace TakeVideoScreenshot
                     me.Position -= TimeSpan.FromSeconds(5);
                     break;
 
-                case Key.S:
+                case Key.D:
                     me.Position += TimeSpan.FromSeconds(5);
                     break;
             }
@@ -143,7 +143,7 @@ namespace TakeVideoScreenshot
         {
             switch (me.MediaState)
             {
-                case MediaState.Play:
+                case MediaPlaybackState.Play:
                     me.Pause();
                     break;
 
@@ -222,9 +222,9 @@ namespace TakeVideoScreenshot
             return date + " " + time;
         }
 
-        private void Me_MediaOpened(object sender, MediaOpenedRoutedEventArgs e)
+        private void Me_MediaOpened(object sender, MediaOpenedEventArgs e)
         {
-            sld.Maximum = me.NaturalDuration.TimeSpan.TotalMilliseconds;
+            sld.Maximum = me.NaturalDuration.HasValue ? me.NaturalDuration.Value.TotalMilliseconds : 0;
         }
 
         private void Me_RenderingVideo(object sender, RenderingVideoEventArgs e)
