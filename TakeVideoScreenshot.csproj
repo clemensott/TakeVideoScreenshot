@@ -36,11 +36,11 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="ffme.win, Version=4.1.300.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>packages\FFME.Windows.4.1.300\lib\net461\ffme.win.dll</HintPath>
+    <Reference Include="ffme.win, Version=4.2.330.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>packages\FFME.Windows.4.2.330\lib\net461\ffme.win.dll</HintPath>
     </Reference>
-    <Reference Include="FFmpeg.AutoGen, Version=4.1.0.4, Culture=neutral, PublicKeyToken=9b7632533a381715, processorArchitecture=MSIL">
-      <HintPath>packages\FFmpeg.AutoGen.4.1.0.4\lib\net45\FFmpeg.AutoGen.dll</HintPath>
+    <Reference Include="FFmpeg.AutoGen, Version=4.2.2.1, Culture=neutral, PublicKeyToken=9b7632533a381715, processorArchitecture=MSIL">
+      <HintPath>packages\FFmpeg.AutoGen.4.2.2.1\lib\net45\FFmpeg.AutoGen.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Data" />
@@ -98,7 +98,9 @@
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
     </EmbeddedResource>
-    <None Include="packages.config" />
+    <None Include="packages.config">
+      <SubType>Designer</SubType>
+    </None>
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>
@@ -106,7 +108,9 @@
     <AppDesigner Include="Properties\" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="App.config" />
+    <None Include="App.config">
+      <SubType>Designer</SubType>
+    </None>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

@@ -6,6 +6,7 @@ using System.Windows;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Threading;
+using Unosquare.FFME;
 using Unosquare.FFME.Common;
 
 namespace TakeVideoScreenshot
@@ -24,7 +25,7 @@ namespace TakeVideoScreenshot
         {
             InitializeComponent();
 
-            //Unosquare.FFME.MediaElement.FFmpegDirectory = Environment.CurrentDirectory;
+            Library.FFmpegDirectory = Environment.CurrentDirectory;
 
             timer = new DispatcherTimer();
             timer.Interval = TimeSpan.FromSeconds(1);
@@ -50,7 +51,7 @@ namespace TakeVideoScreenshot
 
                 videoCreated = file.LastWriteTime;
 
-                me.Source = new Uri(file.FullName);
+                me.Open(new Uri(file.FullName));
                 me.Play();
             }
         }
