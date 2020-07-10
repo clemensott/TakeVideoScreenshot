@@ -112,6 +112,12 @@
       <SubType>Designer</SubType>
     </None>
   </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\StdOttLib\StdOttFrameworkLib\StdOttFrameworkLib.csproj">
+      <Project>{D1334524-78A5-4D16-93BF-27A57C6DBE56}</Project>
+      <Name>StdOttFrameworkLib</Name>
+    </ProjectReference>
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

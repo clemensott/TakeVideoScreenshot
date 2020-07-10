@@ -1,4 +1,5 @@
-﻿using System;
+﻿using StdOttFramework.RestoreWindow;
+using System;
 using System.ComponentModel;
 using System.IO;
 using System.Threading.Tasks;
@@ -18,7 +19,7 @@ namespace TakeVideoScreenshot
     {
         private bool isUpadatingSlider;
         private DateTime videoCreated;
-        private DispatcherTimer timer;
+        private readonly DispatcherTimer timer;
         private BitmapDataBuffer bmpBuffer;
 
         public MainWindow()
@@ -26,6 +27,7 @@ namespace TakeVideoScreenshot
             InitializeComponent();
 
             Library.FFmpegDirectory = Environment.CurrentDirectory;
+            RestoreWindowHandler.Activate(this, RestoreWindowSettings.GetDefault());
 
             timer = new DispatcherTimer();
             timer.Interval = TimeSpan.FromSeconds(1);
@@ -39,6 +41,7 @@ namespace TakeVideoScreenshot
 
             isUpadatingSlider = true;
             sld.Value = me.Position.TotalMilliseconds;
+            tblPosition.Text = FomratTimeSpan(me.Position);
             isUpadatingSlider = false;
         }
 
@@ -56,15 +59,14 @@ namespace TakeVideoScreenshot
             }
         }
 
-        private bool IsPicture(FileInfo file)
+        private void TbnPlayPause_Checked(object sender, RoutedEventArgs e)
         {
-            string e = file.Extension.ToLower();
-            return e == ".jpeg" || e == ".jpg" || e == ".png" || e == ".bmp";
+            me.Play();
         }
 
-        private void BtnPlayPause_Click(object sender, RoutedEventArgs e)
+        private void TbnPlayPause_Unchecked(object sender, RoutedEventArgs e)
         {
-            PlayPause();
+            me.Pause();
         }
 
         private void BtnSlower_Click(object sender, RoutedEventArgs e)
@@ -152,17 +154,6 @@ namespace TakeVideoScreenshot
                     me.Play();
                     break;
             }
-
-            //switch (me.LoadedBehavior)
-            //{
-            //    case MediaState.Play:
-            //        me.LoadedBehavior = MediaState.Pause;
-            //        break;
-
-            //    default:
-            //        me.LoadedBehavior = MediaState.Play;
-            //        break;
-            //}
         }
 
         private void SlowerDown()
@@ -225,12 +216,27 @@ namespace TakeVideoScreenshot
 
         private void Me_MediaOpened(object sender, MediaOpenedEventArgs e)
         {
-            sld.Maximum = me.NaturalDuration.HasValue ? me.NaturalDuration.Value.TotalMilliseconds : 0;
+            TimeSpan? duration = me.NaturalDuration;
+            sld.Maximum = duration.HasValue ? duration.Value.TotalMilliseconds : 0;
+            tblDuration.Text = FomratTimeSpan(duration.GetValueOrDefault());
+            tblPosition.Text = FomratTimeSpan(me.Position);
+
+            gidSlider.Visibility = Visibility.Visible;
+        }
+
+        private static string FomratTimeSpan(TimeSpan ts)
+        {
+            return TimeSpan.FromSeconds(Math.Round(ts.TotalSeconds)).ToString("c");
         }
 
         private void Me_RenderingVideo(object sender, RenderingVideoEventArgs e)
         {
             bmpBuffer = e.Bitmap;
+        }
+
+        private void Me_MediaStateChanged(object sender, MediaStateChangedEventArgs e)
+        {
+            tbnPlayPause.IsChecked = e.MediaState == MediaPlaybackState.Play;
         }
 
         protected override void OnClosing(CancelEventArgs e)

@@ -16,21 +16,43 @@
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
 
-        <StackPanel Grid.Row="0" Orientation="Horizontal">
-            <Button Content="PlayPause" Width="100" Height="22" Click="BtnPlayPause_Click"/>
-            <Button Content="Slower" Width="100" Height="22" Click="BtnSlower_Click"/>
-            <Button Content="Faster" Width="100" Height="22" Click="BtnFaster_Click"/>
-            <Button Content="Frame Back" Width="100" Height="22" Click="BtnBack_Click"/>
-            <Button Content="Frame Forward" Width="100" Height="22" Click="BtnFor_Click"/>
-            <Button Content="Take" Width="100" Height="22" Click="BtnTake_Click"/>
-            <TextBox Name="tbxFilePrefix" Width="1550"/>
-        </StackPanel>
+        <Grid Grid.Row="0" Margin="2">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
 
-        <Slider Grid.Row="1" Name="sld" Minimum="0" Maximum="1" IsMoveToPointEnabled="True"
-                ValueChanged="Sld_ValueChanged"/>
+            <ToggleButton x:Name="tbnPlayPause" Content="PlayPause" Width="100" Height="22" Margin="2"
+                          Checked="TbnPlayPause_Checked" Unchecked="TbnPlayPause_Unchecked"/>
+            <Button Grid.Column="1" Content="Slower" Width="100" Height="22" Margin="2" Click="BtnSlower_Click"/>
+            <Button Grid.Column="2" Content="Faster" Width="100" Height="22" Margin="2" Click="BtnFaster_Click"/>
+            <Button Grid.Column="3" Content="Frame Back" Width="100" Height="22" Margin="2" Click="BtnBack_Click"/>
+            <Button Grid.Column="4" Content="Frame Forward" Width="100" Height="22" Margin="2" Click="BtnFor_Click"/>
+            <Button Grid.Column="5" Content="Take" Width="100" Height="22" Margin="2" Click="BtnTake_Click"/>
+            <TextBox Grid.Column="6" Name="tbxFilePrefix" Margin="2"/>
+        </Grid>
+
+        <Grid Grid.Row="1" Name="gidSlider" Margin="2" Visibility="Collapsed">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
+
+            <TextBlock x:Name="tblPosition" Text="0:00" Margin="2"/>
+            <Slider Grid.Column="1" Name="sld" Minimum="0" Maximum="1" IsMoveToPointEnabled="True" 
+                    VerticalAlignment="Center" Margin="5,1" ValueChanged="Sld_ValueChanged"/>
+            <TextBlock Grid.Column="2" x:Name="tblDuration" Text="00:00:00" Margin="2"/>
+        </Grid>
 
         <ffme:MediaElement Grid.Row="2" Name="me" IsMuted="True" LoadedBehavior="Play" 
-                           MediaOpened="Me_MediaOpened" RenderingVideo="Me_RenderingVideo"/>
+                           MediaOpened="Me_MediaOpened" RenderingVideo="Me_RenderingVideo"
+                           MediaStateChanged="Me_MediaStateChanged"/>
 
         <Rectangle Grid.Row="2" Name="rect" Fill="Transparent" Focusable="True" PreviewMouseUp="Rect_PreviewMouseUp"/>
     </Grid>

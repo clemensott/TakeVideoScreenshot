@@ -1,9 +1,11 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 14
-VisualStudioVersion = 14.0.25420.1
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.30204.135
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TakeVideoScreenshot", "TakeVideoScreenshot.csproj", "{DFC08FA7-188D-4A2F-A393-3D304C045826}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "StdOttFrameworkLib", "..\StdOttLib\StdOttFrameworkLib\StdOttFrameworkLib.csproj", "{D1334524-78A5-4D16-93BF-27A57C6DBE56}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -15,8 +17,15 @@ Global
 		{DFC08FA7-188D-4A2F-A393-3D304C045826}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{DFC08FA7-188D-4A2F-A393-3D304C045826}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{DFC08FA7-188D-4A2F-A393-3D304C045826}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D1334524-78A5-4D16-93BF-27A57C6DBE56}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D1334524-78A5-4D16-93BF-27A57C6DBE56}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D1334524-78A5-4D16-93BF-27A57C6DBE56}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D1334524-78A5-4D16-93BF-27A57C6DBE56}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {9E2D61A2-7448-4814-8A35-52FA5FE2CF8A}
 	EndGlobalSection
 EndGlobal
